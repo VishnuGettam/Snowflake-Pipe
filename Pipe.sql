@@ -4,7 +4,6 @@ create or replace database DEV;
 --Schema Source
 create or replace schema source;
 
-
 --storage integration object 
 use role accountadmin;
 
@@ -16,9 +15,6 @@ storage_allowed_locations = ('s3://snowflake-dev-s3/Load/CSV/')
 storage_aws_role_arn = 'arn:aws:iam::819162972734:role/Snowflake-Aws-Integration-Role'; 
 
 desc integration snowflake_aws_integration;
-
-
-
 
 --file format object for CSV 
 use role sysadmin;
@@ -50,8 +46,9 @@ from @aws_s3_csv
 (file_format => 'ff_csv') emp;
 
 
+
 --create source table 
-create or replace transient table tblemployeesource
+create or replace transient table tblemployee_source
 (
     Filename varchar(100),
     RowId int,
@@ -93,35 +90,51 @@ alter pipe snowflake_aws_csv_pipe refresh;
 --validate the pipe load history 
 --use validate_pipe_load function
 --show any errors in loading data .
-select * from table(validate_pipe_load(PIPE_NAME => 'snowflake_aws_csv_pipe' , START_TIME => dateadd(hour,-1,current_timestamp()) ));
+select * from table(validate_pipe_load(PIPE_NAME => 'snowflake_aws_csv_pipe' , START_TIME => dateadd(hour,-1,current_timestamp()) )); 
 
 --check the data 
 select * from tblemployeesource;
 
+--validate the pipe load history 
+--use copy_history table function 
+select * from table(information_schema.copy_history(table_name=>'tblemployee_source', START_TIME => dateadd(hour,-1,current_timestamp()) ));
+
+
+--creation of notification integration 
+create or replace notification integration pipe_error_sns
+type = queue
+notification_provider = aws_sns
+enabled = true
+direction = outbound
+AWS_SNS_TOPIC_ARN  = 'arn:aws:sns:us-east-1:819162972734:Snowpipe_Error_Notification'
+AWS_SNS_ROLE_ARN  = 'arn:aws:iam::819162972734:role/snowpipe_error_notification_role';
+
+--check the values for IAM/EXTERNAL_ID and update the same in AWS ROLE
+desc integration pipe_error_sns;
+
+--modify the pipe to add error integration 
+create or replace pipe snowflake_aws_csv_pipe
+auto_ingest = true
+--error integration to message channel 
+error_integration = pipe_error_sns
+as
+copy into tblemployee_source
+from 
+(
+select 
+metadata$filename,
+metadata$file_row_number :: int ,
+emp.$1 ,emp.$2,emp.$3,emp.$4,emp.$5,emp.$6 :: date
+from @aws_s3_csv 
+(file_format => 'ff_csv') emp
+) 
+file_format = (format_name = 'ff_csv');
+
+
+--to load the historical files into queue 
+alter pipe snowflake_aws_csv_pipe refresh;
 
 --validate the pipe load history 
 --use copy_history table function 
-select * from table(information_schema.copy_history(table_name=>'tblemployeesource', START_TIME => dateadd(hour,-1,current_timestamp()) ));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+select * from table(information_schema.copy_history(table_name=>'tblemployee_source', START_TIME => dateadd(hour,-1,current_timestamp()) )) 
+order by Last_Load_time desc;
