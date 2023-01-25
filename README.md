@@ -7,3 +7,13 @@
 3.Create a AWS Role with AWS account and mention trust entity relationship .
 
 4.Add Snowflake integration object with the ARN for th aws role .
+
+5.Create file format (CSV) and stage object with the allowed URL's mentioned.
+
+6.Create pipe object and update the SNS ARN in the bucket event notification.
+
+7.Check the status of pipe and load the file in S3 bucket.
+
+8.Validate the data loading process and errors can be checked either using "validate_pipe_load"/"copy_history" table functions.
+
+9.Alternatively error integration to message channel (AWS) which is a Notification Integration in Snowflake to SNS topic can be added for error validations. 
