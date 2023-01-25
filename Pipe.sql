@@ -12,7 +12,7 @@ type = 'external_stage'
 storage_provider = 's3'
 enabled = true
 storage_allowed_locations = ('s3://snowflake-dev-s3/Load/CSV/')
-storage_aws_role_arn = 'arn:aws:iam::819162972734:role/Snowflake-Aws-Integration-Role'; 
+storage_aws_role_arn = '<AWS ROLE ARN>'; 
 
 desc integration snowflake_aws_integration;
 
@@ -106,8 +106,8 @@ type = queue
 notification_provider = aws_sns
 enabled = true
 direction = outbound
-AWS_SNS_TOPIC_ARN  = 'arn:aws:sns:us-east-1:819162972734:Snowpipe_Error_Notification'
-AWS_SNS_ROLE_ARN  = 'arn:aws:iam::819162972734:role/snowpipe_error_notification_role';
+AWS_SNS_TOPIC_ARN  = '<SNS Topic ARN>'
+AWS_SNS_ROLE_ARN  = '<Error Notification ROLE ARN>';
 
 --check the values for IAM/EXTERNAL_ID and update the same in AWS ROLE
 desc integration pipe_error_sns;
