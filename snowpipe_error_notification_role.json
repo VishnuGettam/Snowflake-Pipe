@@ -4,12 +4,12 @@
         {
             "Effect": "Allow",
             "Principal": {
-                "AWS": "arn:aws:iam::010726987431:user/yk920000-s"
+                "AWS": "<STORAGE_AWS_IAM_USER_ARN>"
             },
             "Action": "sts:AssumeRole",
             "Condition": {
                 "StringEquals": {
-                    "sts:ExternalId": "SU95166_SFCRole=2_toyHyM9PBum5TWfs8+1RdQqDWwE="
+                    "sts:ExternalId": "<STORAGE_AWS_EXTERNAL_ID>"
                 }
             }
         }
