@@ -6,7 +6,7 @@
             "Action": [
                 "sns:Publish"
             ],
-            "Resource": "arn:aws:sns:us-east-1:819162972734:Snowpipe_Error_Notification"
+            "Resource": "<SNS Topic ARN>"
         }
     ]
 }
